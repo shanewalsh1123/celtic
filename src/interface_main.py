@@ -3,6 +3,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 
 from user_interface import Ui_Form
+from utils import annuity_total
 
 
 class UserInterface(qtw.QWidget):
@@ -33,7 +34,7 @@ class UserInterface(qtw.QWidget):
             )
             return
 
-        qtw.QMessageBox.information(self, 'Success', 'Ran successfully')
+        interest_paid = annuity_total(mortgage_value, interest_rate, term_length) - mortgage_value
 
 
 if __name__ == '__main__':
