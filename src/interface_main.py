@@ -34,7 +34,8 @@ class UserInterface(qtw.QWidget):
             )
             return
 
-        interest_paid = annuity_total(mortgage_value, interest_rate, term_length) - mortgage_value
+        if self.ui.interest_type_box.currentText() == 'ANN':
+            interest_paid = annuity_total(mortgage_value, interest_rate, term_length) - mortgage_value
 
 
 if __name__ == '__main__':
