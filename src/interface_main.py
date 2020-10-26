@@ -19,6 +19,7 @@ class UserInterface(qtw.QWidget):
         self.ui.mortgage_input.setValidator(self.onlyInt)
         self.ui.initial_interest_input.setValidator(self.onlyFloat)
         self.ui.base_full_term_input.setValidator(self.onlyInt)
+        self.ui.second_scen_full_term_input.setValidator(self.onlyInt)
 
         # Connections
         self.ui.run_button.clicked.connect(self.run)
@@ -27,7 +28,8 @@ class UserInterface(qtw.QWidget):
         try:
             mortgage_value = int(self.ui.mortgage_input.text())
             interest_rate = float(self.ui.initial_interest_input.text()) / (100 * 12)
-            term_length = int(self.ui.base_full_term_input.text())
+            term_length_base = int(self.ui.base_full_term_input.text())
+            term_length_second = int(self.ui.second_scen_full_term_input.text())
         except ValueError:
             qtw.QMessageBox.critical(
                 self, 'Warning', 'Please ensure all information is put in correctly'
@@ -35,7 +37,9 @@ class UserInterface(qtw.QWidget):
             return
 
         if self.ui.interest_type_box.currentText() == 'ANN':
-            interest_paid = annuity_total(mortgage_value, interest_rate, term_length) - mortgage_value
+            interest_paid_base = annuity_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
+            interest_paid_second = annuity_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
+            base_minus_second = interest_paid_base - interest_paid_second
 
 
 if __name__ == '__main__':
