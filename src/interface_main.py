@@ -29,8 +29,11 @@ class UserInterface(qtw.QWidget):
 
     def run(self):
         home_dir = pathlib.Path.home()
-        desktop = os.path.expanduser('~/Desktop')
+        desktop = os.path.expanduser('~/Desktop/output.csv')
         filename = qtw.QFileDialog.getSaveFileName(self, 'Save File', desktop)
+
+        if not filename[0]:
+            return
 
         try:
             mortgage_value = int(self.ui.mortgage_input.text())
