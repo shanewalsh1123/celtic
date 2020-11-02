@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 
 from user_interface import Ui_Form
-from utils import annuity_total, interest_only_total, write_to_file
+from utils import annuity_total, interest_only_total, partial_interest_only_total, write_to_file
 
 
 class UserInterface(qtw.QWidget):
@@ -23,6 +23,8 @@ class UserInterface(qtw.QWidget):
         self.ui.initial_interest_input.setValidator(self.onlyFloat)
         self.ui.base_full_term_input.setValidator(self.onlyInt)
         self.ui.second_scen_full_term_input.setValidator(self.onlyInt)
+        self.ui.base_IIOT_input.setValidator(self.onlyInt)
+        self.ui.second_scen_IIOT_input.setValidator(self.onlyInt)
 
         # Connections
         self.ui.run_button.clicked.connect(self.run)
@@ -40,6 +42,10 @@ class UserInterface(qtw.QWidget):
             interest_rate = float(self.ui.initial_interest_input.text()) / (100 * 12)
             term_length_base = int(self.ui.base_full_term_input.text())
             term_length_second = int(self.ui.second_scen_full_term_input.text())
+            if self.ui.interest_type_box.currentText() == 'PIO':
+                IO_term_length_base = int(self.ui.base_IIOT_input.text())
+                IO_term_length_second = int(self.ui.second_scen_IIOT_input.text())
+
         except ValueError:
             qtw.QMessageBox.critical(
                 self, 'Warning', 'Please ensure all information is put in correctly'
@@ -52,6 +58,9 @@ class UserInterface(qtw.QWidget):
         elif self.ui.interest_type_box.currentText() == 'IOM':
             interest_paid_base = interest_only_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
             interest_paid_second = interest_only_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
+        elif self.ui.interest_type_box.currentText() == 'PIO':
+            interest_paid_base = partial_interest_only_total(mortgage_value, interest_rate, term_length_base, IO_term_length_base) - mortgage_value
+            interest_paid_second = partial_interest_only_total(mortgage_value, interest_rate, term_length_second, IO_term_length_second) - mortgage_value
         base_minus_second = interest_paid_base - interest_paid_second
         labels = [
             'Mortgage Value',
