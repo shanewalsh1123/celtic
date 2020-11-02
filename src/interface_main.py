@@ -28,6 +28,23 @@ class UserInterface(qtw.QWidget):
 
         # Connections
         self.ui.run_button.clicked.connect(self.run)
+        self.ui.interest_type_box.activated[str].connect(self.on_activated)
+
+        self.on_activated(self.ui.interest_type_box.currentText())
+
+    def on_activated(self, text):
+        self.combo_text = text
+        if self.combo_text == 'PIO':
+            self.ui.base_IIOT_input.show()
+            self.ui.second_scen_IIOT_input.show()
+            self.ui.base_IIOT_label.show()
+            self.ui.second_scen_IIOT_label.show()
+            self.ui.interest_type_box.setFocus()
+        else:
+            self.ui.base_IIOT_input.hide()
+            self.ui.second_scen_IIOT_input.hide()
+            self.ui.base_IIOT_label.hide()
+            self.ui.second_scen_IIOT_label.hide()
 
     def run(self):
         home_dir = pathlib.Path.home()
