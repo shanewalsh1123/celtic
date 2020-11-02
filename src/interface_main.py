@@ -6,7 +6,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 
 from user_interface import Ui_Form
-from utils import annuity_total, write_to_file
+from utils import annuity_total, interest_only_total, write_to_file
 
 
 class UserInterface(qtw.QWidget):
@@ -49,26 +49,29 @@ class UserInterface(qtw.QWidget):
         if self.ui.interest_type_box.currentText() == 'ANN':
             interest_paid_base = annuity_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
             interest_paid_second = annuity_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
-            base_minus_second = interest_paid_base - interest_paid_second
-            labels = [
-                'Mortgage Value',
-                'Initial Interest Rate',
-                'Base Term Length',
-                'Second Scenario Term Length',
-                'Interest Paid Base',
-                'Interest Paid Second',
-                'Difference'
-            ]
-            data = [
-                mortgage_value,
-                interest_rate,
-                term_length_base,
-                term_length_second,
-                interest_paid_base,
-                interest_paid_second,
-                base_minus_second,
-            ]
-            write_to_file(filename[0], labels, data)
+        elif self.ui.interest_type_box.currentText() == 'IOM':
+            interest_paid_base = interest_only_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
+            interest_paid_second = interest_only_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
+        base_minus_second = interest_paid_base - interest_paid_second
+        labels = [
+            'Mortgage Value',
+            'Initial Interest Rate',
+            'Base Term Length',
+            'Second Scenario Term Length',
+            'Interest Paid Base',
+            'Interest Paid Second',
+            'Difference'
+        ]
+        data = [
+            mortgage_value,
+            interest_rate,
+            term_length_base,
+            term_length_second,
+            interest_paid_base,
+            interest_paid_second,
+            base_minus_second,
+        ]
+        write_to_file(filename[0], labels, data)
 
 
 if __name__ == '__main__':

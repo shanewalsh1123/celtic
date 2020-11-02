@@ -7,6 +7,10 @@ def annuity_total(mortgage_value, rate, N):
     return N * rate * mortgage_value/ (1 - (1 + rate) ** (-N))
 
 
+def interest_only_total(mortgage_value, rate, N):
+    return mortgage_value * (rate * N + 1)
+
+
 def write_to_file(filename: os.PathLike, labels: List[str], data: List[Any]):
     with open(filename, 'w') as f:
         file_writer = csv.writer(f, delimiter=',')
