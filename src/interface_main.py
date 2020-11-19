@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pathlib
 
@@ -50,6 +51,17 @@ class UserInterface(qtw.QWidget):
         home_dir = pathlib.Path.home()
         desktop = os.path.expanduser('~/Desktop/output.csv')
         filename = qtw.QFileDialog.getSaveFileName(self, 'Save File', desktop)
+
+        n_rows = self.ui.rate_changes_table.rowCount()
+        rate_change_list = []
+        for i in range(n_rows):
+            change_date = self.ui.rate_changes_table.item(i, 0)
+            change_rate = self.ui.rate_changes_table.item(i, 1)
+
+            if change_date is not None and change_rate is not None:
+                change_date_value = datetime.strptime(change_date.text(), '%d/%M/%Y')
+                change_rate_value = float(change_rate.text())
+                rate_change_list.append([change_date_value, change_rate_value])
 
         if not filename[0]:
             return
