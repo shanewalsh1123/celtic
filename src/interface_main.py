@@ -7,7 +7,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 
 from user_interface import Ui_Form
-from utils import annuity_total, interest_only_total, partial_interest_only_total, write_to_file
+from utils import annuity_total, interest_only_total, partial_interest_only_total, write_to_file, date_difference
 
 
 class UserInterface(qtw.QWidget):
@@ -54,14 +54,22 @@ class UserInterface(qtw.QWidget):
 
         n_rows = self.ui.rate_changes_table.rowCount()
         rate_change_list = []
+        previous_date = self.ui.date_input.date().toPyDate()
         for i in range(n_rows):
             change_date = self.ui.rate_changes_table.item(i, 0)
             change_rate = self.ui.rate_changes_table.item(i, 1)
 
             if change_date is not None and change_rate is not None:
-                change_date_value = datetime.strptime(change_date.text(), '%d/%M/%Y')
+                change_date_value = datetime.strptime(change_date.text(), '%d/%m/%Y')
+                n_months = date_difference(change_date_value, previous_date)
                 change_rate_value = float(change_rate.text())
-                rate_change_list.append([change_date_value, change_rate_value])
+                if not n_months > 0:
+                    qtw.QMessageBox.critical(
+                        self, 'Warning', 'Please ensure dates are in the correct order.'
+                    )
+                    return
+                rate_change_list.append([n_months, change_rate_value])
+                previous_date = change_date_value
 
         if not filename[0]:
             return

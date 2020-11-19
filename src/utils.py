@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import os
 from typing import Any, List
 
@@ -26,3 +27,7 @@ def write_to_file(filename: os.PathLike, labels: List[str], data: List[Any]):
         file_writer = csv.writer(f, delimiter=',')
         file_writer.writerow(labels)
         file_writer.writerow(data)
+
+
+def date_difference(date_1: datetime, date_2: datetime):
+    return (date_1.year - date_2.year) * 12 + date_1.month - date_2.month
