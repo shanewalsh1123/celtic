@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pathlib
 
@@ -6,7 +7,7 @@ from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 
 from user_interface import Ui_Form
-from utils import annuity_total, interest_only_total, partial_interest_only_total, write_to_file
+from utils import annuity_total, interest_only_total, partial_interest_only_total, write_to_file, date_difference
 
 
 class UserInterface(qtw.QWidget):
@@ -51,6 +52,30 @@ class UserInterface(qtw.QWidget):
         desktop = os.path.expanduser('~/Desktop/output.csv')
         filename = qtw.QFileDialog.getSaveFileName(self, 'Save File', desktop)
 
+        n_rows = self.ui.rate_changes_table.rowCount()
+        rate_change_list = []
+        previous_date = self.ui.date_input.date().toPyDate()
+        rate_value = float(self.ui.initial_interest_input.text()) / (100 * 12)
+        total_months = 0
+        for i in range(n_rows):
+            change_date = self.ui.rate_changes_table.item(i, 0)
+            change_rate = self.ui.rate_changes_table.item(i, 1)
+
+            if change_date is not None and change_rate is not None:
+                change_date_value = datetime.strptime(change_date.text(), '%d/%m/%Y')
+                n_months = date_difference(change_date_value, previous_date)
+                total_months += n_months
+                change_rate_value = float(change_rate.text()) / (100 * 12)
+                if not n_months > 0:
+                    qtw.QMessageBox.critical(
+                        self, 'Warning', 'Please ensure dates are in the correct order.'
+                    )
+                    return
+                rate_change_list.append((n_months, rate_value))
+                rate_value = change_rate_value 
+                previous_date = change_date_value
+
+        rate_change_list.append((0, rate_value))
         if not filename[0]:
             return
 
@@ -70,14 +95,14 @@ class UserInterface(qtw.QWidget):
             return
 
         if self.ui.interest_type_box.currentText() == 'ANN':
-            interest_paid_base = annuity_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
-            interest_paid_second = annuity_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
+            interest_paid_base = annuity_total(mortgage_value, interest_rate, term_length_base, rate_change_list) - mortgage_value
+            interest_paid_second = annuity_total(mortgage_value, interest_rate, term_length_second, rate_change_list) - mortgage_value
         elif self.ui.interest_type_box.currentText() == 'IOM':
-            interest_paid_base = interest_only_total(mortgage_value, interest_rate, term_length_base) - mortgage_value
-            interest_paid_second = interest_only_total(mortgage_value, interest_rate, term_length_second) - mortgage_value
+            interest_paid_base = interest_only_total(mortgage_value, interest_rate, term_length_base, rate_change_list) - mortgage_value
+            interest_paid_second = interest_only_total(mortgage_value, interest_rate, term_length_second, rate_change_list) - mortgage_value
         elif self.ui.interest_type_box.currentText() == 'PIO':
-            interest_paid_base = partial_interest_only_total(mortgage_value, interest_rate, term_length_base, IO_term_length_base) - mortgage_value
-            interest_paid_second = partial_interest_only_total(mortgage_value, interest_rate, term_length_second, IO_term_length_second) - mortgage_value
+            interest_paid_base = partial_interest_only_total(mortgage_value, interest_rate, term_length_base, IO_term_length_base, rate_change_list) - mortgage_value
+            interest_paid_second = partial_interest_only_total(mortgage_value, interest_rate, term_length_second, IO_term_length_second, rate_change_list) - mortgage_value
         base_minus_second = interest_paid_base - interest_paid_second
         labels = [
             'Mortgage Value',
@@ -90,14 +115,21 @@ class UserInterface(qtw.QWidget):
         ]
         data = [
             mortgage_value,
-            interest_rate,
+            100 * 12 * interest_rate,
             term_length_base,
             term_length_second,
             interest_paid_base,
             interest_paid_second,
             base_minus_second,
         ]
-        write_to_file(filename[0], labels, data)
+        new_rate_list = [(self.ui.date_input.date().toString('dd/MM/yyyy'), 100 * 12 * interest_rate)]
+        for i in range(n_rows):
+            change_date = self.ui.rate_changes_table.item(i, 0)
+            change_rate = self.ui.rate_changes_table.item(i, 1)
+            if change_date is not None and change_rate is not None:
+                new_rate_list.append((change_date.text(), change_rate.text()))
+
+        write_to_file(filename[0], labels, data, new_rate_list)
 
 
 if __name__ == '__main__':
